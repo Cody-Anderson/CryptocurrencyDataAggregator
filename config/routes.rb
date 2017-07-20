@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
 
   
+  resources :widgets
   get 'exchanges/index'
   resources :exchanges
 
