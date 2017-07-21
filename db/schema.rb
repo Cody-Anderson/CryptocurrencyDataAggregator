@@ -11,18 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170720223603) do
+ActiveRecord::Schema.define(version: 20170721164017) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "cryptocurrencies", force: :cascade do |t|
-    t.string "exchange"                     # Full name of exchange (ex: Bittrex or Poloniex)
-    t.string "pair"                         # Currency pair, format is tickers separated by underscore. Ex: BTC_ETH, BTC_SC, USDT_BTC
-    t.timestamp "timestamp", null: false    # UTC timestamp
-    t.decimal "open", scale: 8, null: false
-    t.decimal "high", scale: 8, null: false
-    t.decimal "low", scale: 8, null: false
-    t.decimal "close", scale: 8, null: false
+  create_table "candlesticks", force: :cascade do |t|
+    t.string   "exchange"
+    t.string   "pair"
+    t.datetime "timestamp",                          null: false
+    t.decimal  "open",      precision: 32, scale: 8, null: false
+    t.decimal  "high",      precision: 32, scale: 8, null: false
+    t.decimal  "low",       precision: 32, scale: 8, null: false
+    t.decimal  "close",     precision: 32, scale: 8, null: false
   end
+
 end

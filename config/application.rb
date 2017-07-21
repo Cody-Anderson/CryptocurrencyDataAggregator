@@ -29,25 +29,29 @@ module Workspace
     if defined?(Rails::Server)
       config.after_initialize do
         Thread.new do
-          loop do 
-            # Get Poloniex candlestick data for all markets, limit to 6 HTTP requests per second, and do something for each candlestick.
-            allTickers = JSON.parse(Net::HTTP.get(URI('https://poloniex.com/public?command=returnTicker')))
+          loop do
+            # Get Poloniex candlestick data for all markets, limit to 6 HTTP requests per second, and write all candlesticks to database, skipping candlesticks that are already in database.
             requestStart = Time.now # Time in seconds
+            allTickers = JSON.parse(Net::HTTP.get(URI('https://poloniex.com/public?command=returnTicker')))
             
             # Loop for each currency pair in the Poloniex market.
             allTickers.each do |ticker|
               # Sleeps to prevent more than 6 requests per second (Poloniex limit)
-              while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.05 end
-              
+              while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.01 end
               requestStart = Time.now
-              monthAgo = requestStart.to_i - 2629746
               
-              # Request candlestick data from Poloniex server
-              candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{monthAgo}&end=9999999999&period=300")))
+              # Request candlestick data from one week ago up to now at five minute intervals.
+              candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - 604800}&end=9999999999&period=300")))
               
-              # Do something for each candlestick
-              candlestickData.each { |candlestick| row = "Poloniex #{ticker[0]} #{candlestick["date"]} #{candlestick["open"]} #{candlestick["high"]} #{candlestick["low"]} #{candlestick["close"]}" }
+              # Do something for each candlestick.
+              candlestickData.each do |candlestick|
+                time = Time.at(candlestick["date"])
+                unless Candlestick.exists?(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time)
+                  Candlestick.create(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"])
+                end
+              end
             end
+            puts "Finished retrieval and storage of Poloniex data."
             
             sleep 300 # Sleep time in seconds
           end
