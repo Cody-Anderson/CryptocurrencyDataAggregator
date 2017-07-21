@@ -26,4 +26,6 @@ ActiveRecord::Schema.define(version: 20170721164017) do
     t.decimal  "close",     precision: 32, scale: 8, null: false
   end
 
+  add_index "candlesticks", ["timestamp", "pair", "exchange"], name: "index_candlesticks_on_timestamp_and_pair_and_exchange", unique: true, using: :btree
+
 end

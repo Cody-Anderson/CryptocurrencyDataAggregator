@@ -40,13 +40,13 @@ module Workspace
               while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.01 end
               requestStart = Time.now
               
-              # Request candlestick data from one week ago up to now at five minute intervals.
-              candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - 604800}&end=9999999999&period=300")))
+              # Request candlestick data at five minute intervals.
+              candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - 3600}&end=9999999999&period=300")))
               
               # Do something for each candlestick.
               candlestickData.each do |candlestick|
                 time = Time.at(candlestick["date"])
-                unless Candlestick.exists?(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time)
+                unless Candlestick.exists?(:timestamp => time, :pair => ticker[0], :exchange => "Poloniex")
                   Candlestick.create(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"])
                 end
               end
