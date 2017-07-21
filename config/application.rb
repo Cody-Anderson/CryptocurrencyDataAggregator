@@ -24,5 +24,17 @@ module Workspace
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
+    
+    if defined?(Rails::Server)
+      config.after_initialize do
+        Thread.new do
+          loop do 
+            sleep 5 # Sleep time is in seconds.
+            # Code to execute here.
+            
+          end
+        end
+      end
+    end
   end
 end
