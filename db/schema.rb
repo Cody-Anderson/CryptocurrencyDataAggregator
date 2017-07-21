@@ -16,10 +16,13 @@ ActiveRecord::Schema.define(version: 20170720223603) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "widgets", force: :cascade do |t|
-    t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  create_table "cryptocurrencies", force: :cascade do |t|
+    t.string "exchange"                     # Full name of exchange (ex: Bittrex or Poloniex)
+    t.string "pair"                         # Currency pair, format is USD_BTC
+    t.timestamp "timestamp", null: false    # UTC timestamp
+    t.decimal "open", scale: 8, null: false
+    t.decimal "high", scale: 8, null: false
+    t.decimal "low", scale: 8, null: false
+    t.decimal "close", scale: 8, null: false
   end
-
 end
