@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(version: 20170720223603) do
 
   create_table "cryptocurrencies", force: :cascade do |t|
     t.string "exchange"                     # Full name of exchange (ex: Bittrex or Poloniex)
-    t.string "pair"                         # Currency pair, format is USD_BTC
+    t.string "pair"                         # Currency pair, format is tickers separated by underscore. Ex: BTC_ETH, BTC_SC, USDT_BTC
     t.timestamp "timestamp", null: false    # UTC timestamp
     t.decimal "open", scale: 8, null: false
     t.decimal "high", scale: 8, null: false

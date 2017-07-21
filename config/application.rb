@@ -1,6 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
+require 'net/http'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -29,9 +30,26 @@ module Workspace
       config.after_initialize do
         Thread.new do
           loop do 
-            sleep 5 # Sleep time is in seconds.
-            # Code to execute here.
+            # Get Poloniex candlestick data for all markets, limit to 6 HTTP requests per second, and do something for each candlestick.
+            allTickers = JSON.parse(Net::HTTP.get(URI('https://poloniex.com/public?command=returnTicker')))
+            requestStart = Time.now # Time in seconds
             
+            # Loop for each currency pair in the Poloniex market.
+            allTickers.each do |ticker|
+              # Sleeps to prevent more than 6 requests per second (Poloniex limit)
+              while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.05 end
+              
+              requestStart = Time.now
+              monthAgo = requestStart.to_i - 2629746
+              
+              # Request candlestick data from Poloniex server
+              candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{monthAgo}&end=9999999999&period=300")))
+              
+              # Do something for each candlestick
+              candlestickData.each { |candlestick| row = "Poloniex #{ticker[0]} #{candlestick["date"]} #{candlestick["open"]} #{candlestick["high"]} #{candlestick["low"]} #{candlestick["close"]}" }
+            end
+            
+            sleep 300 # Sleep time in seconds
           end
         end
       end
