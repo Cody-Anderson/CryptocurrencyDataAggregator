@@ -75,8 +75,8 @@ module Workspace
                     time = Time.at(DateTime.parse(candlestick["T"]).to_time.to_i)
                     
                     # Check if candlestick already exists in database. Then add if it doesn't.
-                    unless Candlestick.exists?(:timestamp => time, :pair => ticker["MarketName"], :exchange => "Bittrex")
-                      Candlestick.create(:exchange => "Bittrex", :pair => ticker["MarketName"], :timestamp => time, :open => candlestick["O"], :high => candlestick["H"], :low => candlestick["L"], :close => candlestick["C"])
+                    unless Candlestick.exists?(:timestamp => time, :pair => ticker["MarketName"].sub('-','_'), :exchange => "Bittrex")
+                      Candlestick.create(:exchange => "Bittrex", :pair => ticker["MarketName"].sub('-','_'), :timestamp => time, :open => candlestick["O"], :high => candlestick["H"], :low => candlestick["L"], :close => candlestick["C"])
                     end
                   end
                 end
