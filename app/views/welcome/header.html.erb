@@ -3,6 +3,26 @@
 <meta charset="UTF-8">
 <head>
 <style>
+
+.btn {
+      -webkit-border-radius: 10;
+      -moz-border-radius: 10;
+      border-radius: 10px;
+      text-shadow: 2px 1px 3px #0d020d;
+      font-family: Arial;
+      color: #ffffff;
+      font-size: 20px;
+      background: #878787;
+      padding: 10px 20px 10px 20px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: #666666;
+      text-decoration: none;
+      cursor:pointer;
+    }
+    
 html { 
   background-color: #4877EE;
   -webkit-background-size: cover;
@@ -37,9 +57,8 @@ ul {
 
 <h1 class="title unselectable">Cryptocurrency Market Aggregator</h1>
 <br>
-<img src='home buttons/new_unselected.png' onmouseover="this.src='home buttons/new_selected.png';" onmouseout="this.src='home buttons/new_unselected.png';"/>
-	<img src='home buttons/about_unselected.png' onmouseover="this.src='home buttons/about_selected.png';" onmouseout="this.src='home buttons/about_unselected.png';"/>
-	<a href = "wallets.html"><img src='home buttons/wallets_unselected.png' onmouseover="this.src='home buttons/wallets_selected.png';" onmouseout="this.src='home buttons/wallets_unselected.png';"/></a>
-	<img src='home buttons/exchanges_unselected.png' onmouseover="this.src='home buttons/exchanges_selected.png';" onmouseout="this.src='home buttons/exchanges_unselected.png';"/>
+	<a href = "about"><button class="btn">About</button></a>
+	<a href = "wallets"><button class="btn">Wallets</button></a>
+	<a href = "exchanges"><button class="btn">Exchanges</button></a>
 </head>
 </html>
