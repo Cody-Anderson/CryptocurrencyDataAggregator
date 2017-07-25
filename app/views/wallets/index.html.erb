@@ -31,7 +31,13 @@
       }  
     </script>
     <style>
-        #btn {
+        div#web {
+            display: none;
+        }
+        div#phone {
+            display: none;
+        }
+        div#pc {
             display: none;
         }
     </style>
@@ -49,9 +55,9 @@
             <button class="btn" onclick="toggle('pc')" id="pcBtn">PC</button>
         </div>
         <div style="margin: 0 auto; width: 400px;">
-            <button class="btn" id="web">Web Button Test</button>
-            <button class="btn" id="phone">Phone Button Test</button>
-            <button class="btn" id="pc">PC Button Test</button>
+            <div id="web"><button class="btn">Web Button Test</button></div>
+            <div id="phone"><button class="btn">Phone Button Test</button></div>
+            <div id="pc"><button class="btn">PC Button Test</button></div>
         </div>
     </body>
 </html>
