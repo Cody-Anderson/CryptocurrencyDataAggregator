@@ -2,15 +2,15 @@
 <html>
     <script language="javascript">
       function toggle(s) { 
-        var web = document.getElementById(s);
-        var displaySetting = s.style.display;
-        var webButton = document.getElementById(s + 'Btn');
+        var e = document.getElementById("web");
+        var displaySetting = e.style.display;
+        var button = document.getElementById(s + 'Btn');
 				
         if (displaySetting == 'block') {
-            web.style.display = 'none';
+            e.style.display = 'none';
         }
         else { 
-          web.style.display = 'block';
+            e.style.display = 'block';
         }
       }  
     </script>
