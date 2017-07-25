@@ -2,12 +2,11 @@
 <html>
     <script language="javascript">
       function toggle(s) {
-        /*
-        if(s.equals('web')) {
+        if(s === 'web') {
             var a = document.getElementById('phone');
             var b = document.getElementById('pc');
         }
-        else if(s.equals('phone')) {
+        else if(s === 'phone') {
             var a = document.getElementById('web');
             var b = document.getElementById('pc');
         }
@@ -15,20 +14,19 @@
             var a = document.getElementById('web');
             var b = document.getElementById('phone');
         }
-        */
         var e = document.getElementById(s);
         var displaySetting = e.style.display;
         var button = document.getElementById(s + 'Btn');
 				
         if (displaySetting == 'block') {
             e.style.display = 'none';
-            //a.style.display = 'block';
-            //b.style.display = 'block';
+            a.style.display = 'block';
+            b.style.display = 'block';
         }
         else { 
             e.style.display = 'block';
-            //a.style.display = 'none';
-            //b.style.display = 'none';
+            a.style.display = 'none';
+            b.style.display = 'none';
         }
       }  
     </script>
