@@ -5,21 +5,24 @@
         if(s === 'web') {
             var a = document.getElementById('phone');
             var b = document.getElementById('pc');
+            a.style.display = 'none';
+            b.style.display = 'none';
         }
         else if(s === 'phone') {
             var a = document.getElementById('web');
             var b = document.getElementById('pc');
+            a.style.display = 'none';
+            b.style.display = 'none';
         }
         else {
             var a = document.getElementById('web');
             var b = document.getElementById('phone');
+            a.style.display = 'none';
+            b.style.display = 'none';
         }
         var e = document.getElementById(s);
         var displaySetting = e.style.display;
         var button = document.getElementById(s + 'Btn');
-        e.style.display = 'none';
-        a.style.display = 'none';
-        b.style.display = 'none';
 				
         if (displaySetting == 'block') {
             e.style.display = 'none';
