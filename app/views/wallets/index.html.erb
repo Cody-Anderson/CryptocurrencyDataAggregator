@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html>
+    <script language="javascript">
+      function toggleClock() { 
+        var web = document.getElementById('test');
+        var displaySetting = test.style.display;
+        var webButton = document.getElementById('webBtn');
+				
+        if (displaySetting == 'block') {
+            web.style.display = 'none';
+        }
+        else { 
+          web.style.display = 'block';
+        }
+      }  
+    </script>
+    <style>
+        div#test {
+            display: block;
+        }
+    </style>
     <meta charset="UTF-8">
     <head>
         <title>Wallets</title>
@@ -8,7 +27,11 @@
     <body>
         <%= render "header/header" %>
         <div style="margin: 0 auto; width: 400px;">
-            <button class="btn">Web</button>
+            <br>
+            <div id="web">
+            <button class="btn" onclick="toggleWeb()" id="webBtn">Web</button>
+            <button class ="btn" id ="test">TEST TEST TEST</button>
+            </div>
             <button class="btn">Phone</button>
             <button class="btn">PC</button>
         </div>
