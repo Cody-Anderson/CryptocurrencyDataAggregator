@@ -48,27 +48,9 @@
     </head>
     <body>
         <%= render "header/header" %>
-        <div style="margin: 0 auto; width: 780px;">
-            <br><br>
-            <f>Where Do You Want Your Wallet to be Stored?</f>
-            <br><br>
-            <div style="margin: 0 auto; width: 580px;">
-                <div style="display: inline-block;"><img src='/images/wallet buttons/web_unselected.png' style="cursor: pointer;" onclick="toggle('web')" id="webBtn" onmouseover="this.src='/images/wallet buttons/web_selected.png';" onmouseout="this.src='images/wallet buttons/web_unselected.png';"/></div></a>            
-                <div style="display: inline-block;"><img src='/images/wallet buttons/phone_unselected.png' style="cursor: pointer;" onclick="toggle('phone')" id="phoneBtn" onmouseover="this.src='/images/wallet buttons/phone_selected.png';" onmouseout="this.src='images/wallet buttons/phone_unselected.png';"/></div></a>            
-                <div style="display: inline-block;"><img src='/images/wallet buttons/pc_unselected.png' style="cursor: pointer;" onclick="toggle('pc')" id="pcBtn" onmouseover="this.src='/images/wallet buttons/pc_selected.png';" onmouseout="this.src='images/wallet buttons/pc_unselected.png';"/></div></a>
-            </div>
-        </div>
-        <br>
+        <br><br>
         <div style="margin: 0 auto; width: 432px;">
-            <div id="web">
-                <a href = "https://www.coinbase.com/?locale=en-US" target = "_blank"><div><img src='/images/wallet buttons/coinbase_unselected.png' onmouseover="this.src='/images/wallet buttons/coinbase_selected.png';" onmouseout="this.src='images/wallet buttons/coinbase_unselected.png';"/></div></a>
-            </div>
-            <div id="phone">
-                <button class="btn">Phone Button Test</button>
-            </div>
-            <div id="pc">
-                <button class="btn">PC Button Test</button>
-            </div>
+                <a href = "https://bitcoin.org/en/download" target = "_blank"><div><img src='/images/wallet buttons/bitcoincore_unselected.png' onmouseover="this.src='/images/wallet buttons/bitcoincore_selected.png';" onmouseout="this.src='images/wallet buttons/bitcoincore_unselected.png';"/></div></a>
         </div>
     </body>
 </html>
