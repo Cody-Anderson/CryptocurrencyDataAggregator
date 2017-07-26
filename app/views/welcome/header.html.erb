@@ -3,26 +3,6 @@
 <meta charset="UTF-8">
 <head>
 <style>
-
-.btn {
-      -webkit-border-radius: 10;
-      -moz-border-radius: 10;
-      border-radius: 10px;
-      text-shadow: 2px 1px 3px #0d020d;
-      font-family: Arial;
-      color: #ffffff;
-      font-size: 20px;
-      background: #878787;
-      padding: 10px 20px 10px 20px;
-      text-decoration: none;
-    }
-
-    .btn:hover {
-      background: #666666;
-      text-decoration: none;
-      cursor:pointer;
-    }
-    
 html { 
   background-color: #4877EE;
   -webkit-background-size: cover;
@@ -55,13 +35,32 @@ ul {
     	-ms-user-select: none;
    	 user-select: none;
 }
+
+    f {
+        font-family: "Arial Black", Gadget, sans-serif;
+        font-size: 30px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 2px 2px #000000;
+        text-align: center;
+    }
+    
+    f.smaller {
+        font-family: "Arial Black", Gadget, sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        text-shadow: 2px 2px #000000;
+        text-align: center;
+    }
 </style>
 
 <h1 class="title unselectable">Cryptocurrency Market Aggregator</h1>
 <br>
-  <a href = "/"><button class="btn">Home</button></a>
-	<a href = "about"><button class="btn">About</button></a>
-	<a href = "wallets"><button class="btn">Wallets</button></a>
-	<a href = "exchanges"><button class="btn">Exchanges</button></a>
+<div style="margin: 0 auto; width: 650px;">
+  <a href = "about"><div style="display: inline-block;"><img src='/images/home buttons/about_unselected.png' onmouseover="this.src='/images/home buttons/about_selected.png';" onmouseout="this.src='images/home buttons/about_unselected.png';"/></div></a>
+	<a href = "wallets"><div style="display: inline-block;"><img src='/images/home buttons/wallets_unselected.png' onmouseover="this.src='/images/home buttons/wallets_selected.png';" onmouseout="this.src='images/home buttons/wallets_unselected.png';"/></div></a>
+	<a href = "exchanges"><div style="display: inline-block;"><img src='/images/home buttons/exchanges_unselected.png' onmouseover="this.src='/images/home buttons/exchanges_selected.png';" onmouseout="this.src='images/home buttons/exchanges_unselected.png';"/></div></a>
+</div>
 </head>
 </html>
