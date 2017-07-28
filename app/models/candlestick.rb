@@ -5,10 +5,10 @@ class Candlestick < ActiveRecord::Base
             t.string   :exchange
             t.string   :pair
             t.datetime :timestamp,                          null: false
-            t.decimal  :open,      precision: 32, scale: 8, null: false
-            t.decimal  :high,      precision: 32, scale: 8, null: false
-            t.decimal  :low,       precision: 32, scale: 8, null: false
-            t.decimal  :close,     precision: 32, scale: 8, null: false
+            t.float  :open,      precision: 32, scale: 8, null: false
+            t.float  :high,      precision: 32, scale: 8, null: false
+            t.float  :low,       precision: 32, scale: 8, null: false
+            t.float  :close,     precision: 32, scale: 8, null: false
             t.integer  :interval,                           null: false
             t.index [:timestamp, :pair, :exchange, :interval], unique: true
         end
