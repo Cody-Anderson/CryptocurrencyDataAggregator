@@ -9,7 +9,8 @@ class Candlestick < ActiveRecord::Base
             t.decimal  :high,      precision: 32, scale: 8, null: false
             t.decimal  :low,       precision: 32, scale: 8, null: false
             t.decimal  :close,     precision: 32, scale: 8, null: false
-            t.index [:timestamp, :pair, :exchange], unique: true
+            t.integer  :interval,                           null: false
+            t.index [:timestamp, :pair, :exchange, :interval], unique: true
         end
     end
     
