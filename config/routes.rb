@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
 
-  
+  root 'welcome#index'
   resources :widgets
+  
   get 'exchanges/index'
   resources :exchanges
 
@@ -11,7 +12,6 @@ Rails.application.routes.draw do
 
   get 'welcome/index'
   resources :about
-  root 'welcome#index'
   
 
 end
