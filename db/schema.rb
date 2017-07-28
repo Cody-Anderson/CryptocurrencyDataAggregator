@@ -19,12 +19,12 @@ ActiveRecord::Schema.define(version: 20170721164017) do
   create_table "candlesticks", force: :cascade do |t|
     t.string   "exchange"
     t.string   "pair"
-    t.datetime "timestamp",                          null: false
-    t.decimal  "open",      precision: 32, scale: 8, null: false
-    t.decimal  "high",      precision: 32, scale: 8, null: false
-    t.decimal  "low",       precision: 32, scale: 8, null: false
-    t.decimal  "close",     precision: 32, scale: 8, null: false
-    t.integer  "interval",                           null: false
+    t.datetime "timestamp", null: false
+    t.float    "open",      null: false
+    t.float    "high",      null: false
+    t.float    "low",       null: false
+    t.float    "close",     null: false
+    t.integer  "interval",  null: false
   end
 
   add_index "candlesticks", ["timestamp", "pair", "exchange"], name: "index_candlesticks_on_timestamp_and_pair_and_exchange", unique: true, using: :btree
