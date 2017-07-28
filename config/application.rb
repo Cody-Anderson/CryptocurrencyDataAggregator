@@ -31,8 +31,8 @@ module Workspace
         Thread.new do
           
           # Format: [[timeIntervalInSeconds, numberOfSeconds], [timeIntervalInSeconds, numberOfSeconds]]
-          # Supported timeIntervalInSeconds values are 300 (5 minutes), 3600 (1 hour)
-          timeToPull = [[300, 60*60*24]]
+          # Supported timeIntervalInSeconds values are 300 (5 minutes), 1800 (30 minutes), 3600 (1 hour), 86400 (1 day)
+          timeToPull = [[300, 60*60*24], [3600, 60*60*24*14]]
           pairsToPull = ["BTC_ETH", "BTC_XMR", "BTC_DASH", "BTC_LTC", "BTC_XRP", "BTC_ZEC", "BTC_SC"]
           
           loop do
@@ -65,16 +65,44 @@ module Workspace
             if ticker[0] == pair
               timeToPull.each do |intervalArray|
                 
+                # Make sure pullInterval is compatible with Poloniex
+                pullInterval = case intervalArray[0]
+                when 300 then 300
+                when 900 then 900
+                when 1800 then 1800
+                when 3600 then 1800 # Merges candlesticks
+                when 7200 then 7200
+                when 14400 then 14400
+                when 86400 then 86400
+                else next
+                end
+                
                 # Sleeps to prevent more than 6 requests per second (Poloniex limit)
                 while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.01 end
                 requestStart = Time.now
                 
-                # Request candlestick data at five minute intervals.
-                candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{intervalArray[0]}")))
+                # Request candlestick data
+                candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{pullInterval}")))
                 
-                # Check if candlestick already exists in database. Then add if it doesn't.
+                # Merge candlesticks if pulling an interval that isn't natively supported by Poloniex
+                if intervalArray[0] == 3600
+                  toBeMerged = false
+                  candlestickData.reverse_each do |candlestick|
+                    if candlestick["date"] % 3600 == 0 && toBeMerged
+                      candlestick["close"] = toBeMerged["close"]
+                      candlestick["low"] = [candlestick["low"], toBeMerged["low"]].min
+                      candlestick["high"] = [candlestick["high"], toBeMerged["high"]].max
+                    else
+                      toBeMerged = candlestick
+                      candlestickData.delete(candlestick)
+                    end
+                  end
+                end
+                
                 candlestickData.each do |candlestick|
                   time = Time.at(candlestick["date"])
+                  
+                  # Check if candlestick already exists in database. Then add if it doesn't and update if it does.
                   currentRecord = Candlestick.find_by(:timestamp => time, :pair => ticker[0], :exchange => "Poloniex", :interval => intervalArray[0])
                   if currentRecord
                     currentRecord.update(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0])
@@ -96,12 +124,10 @@ module Workspace
       allBittrexTickers = JSON.parse(Net::HTTP.get(URI('https://bittrex.com/api/v1.1/public/getmarketsummaries')))
       
       if allBittrexTickers["success"]
-        
         allBittrexTickers["result"].each do |ticker|
           
-          # Check to see if pair is in whitelist
           pairsToPull.each do |pair|
-            
+            # Check to see if pair is in whitelist
             if ticker["MarketName"].sub('-','_') == pair
               
               timeToPull.each do |intervalArray|

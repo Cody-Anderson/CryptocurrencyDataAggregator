@@ -27,6 +27,6 @@ ActiveRecord::Schema.define(version: 20170721164017) do
     t.integer  "interval",  null: false
   end
 
-  add_index "candlesticks", ["timestamp", "pair", "exchange"], name: "index_candlesticks_on_timestamp_and_pair_and_exchange", unique: true, using: :btree
+  add_index "candlesticks", ["timestamp", "pair", "exchange", "interval"], name: "index_candlesticks_on_timestamp_and_pair_and_exchange", unique: true, using: :btree
 
 end
