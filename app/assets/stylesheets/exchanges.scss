@@ -17,12 +17,18 @@
 
 .exchange_button,.exchange_button:link,.exchange_button:visited {
     background-color: #4285F4;
+    box-shadow: 0px 2px 10px #888888;
     color: white;
     padding: 14px 25px;
     text-align: center; 
     text-decoration: none;
+    transition: background-color 0.1s;
+    transition: box-shadow 0.1s;
 }
 
-.exchange_button:hover, .exchange_button:active {
+.exchange_button:hover { background-color: #2f79f3; }
+
+.exchange_button:active {
+    box-shadow: 0px 4px 20px #888888;
     background-color: #0e62ed;
 }
