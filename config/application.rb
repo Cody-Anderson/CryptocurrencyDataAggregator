@@ -65,62 +65,60 @@ module Workspace
         if pairsToPull.include?(ticker[0])
           timeToPull.each do |intervalArray|
               
-              # Set pull interval to highest factor of intervalArray[0] if possible
-              pullInterval = intervalArray[0]
-              unless supportedIntervals.include?(intervalArray[0])
-                supportedIntervals.reverse_each do |interval|
-                  if intervalArray[0] % interval == 0
-                    pullInterval = interval
-                    break
-                  end
+            # Set pull interval to highest factor of intervalArray[0] if possible
+            pullInterval = intervalArray[0]
+            unless supportedIntervals.include?(intervalArray[0])
+              supportedIntervals.reverse_each do |interval|
+                if intervalArray[0] % interval == 0
+                  pullInterval = interval
+                  break
                 end
-              end
-              
-              # Go to next if not able to support that interval
-              unless supportedIntervals.include?(pullInterval) then next end
-              
-              # Sleeps to prevent more than 6 requests per second (Poloniex limit)
-              while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.01 end
-              requestStart = Time.now
-              
-              # Request candlestick data
-              candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{pullInterval}")))
-              
-              # Merge candlesticks if pulling an interval that isn't natively supported by Poloniex
-              unless supportedIntervals.include?(intervalArray[0])
-                newClose = newHigh = 0
-                newLow = Float::INFINITY
-                toBeMerged = false
-                candlestickData.reverse_each do |candlestick|
-                  if candlestick["date"] % intervalArray[0] == 0 && toBeMerged
-                    candlestick["close"] = newClose
-                    candlestick["low"] = [newLow, candlestick["low"]].min
-                    candlestick["high"] = [newHigh, candlestick["high"]].max
-                    newClose = newHigh = 0
-                    newLow = Float::INFINITY
-                    toBeMerged = false
-                  else
-                    newLow = [newLow, candlestick["low"]].min
-                    newHigh = [newHigh, candlestick["high"]].max
-                    unless toBeMerged
-                      toBeMerged = true
-                      newClose = candlestick["close"]
-                    end
-                    candlestickData.delete(candlestick)
-                  end
-                end
-              end
-              
-              # Check if each candlestick already exists in database. Then add if it doesn't and update if it does.
-              candlestickData.each do |candlestick|
-                time = Time.at(candlestick["date"])
-                currentRecord = Candlestick.find_by(:timestamp => time, :pair => ticker[0], :exchange => "Poloniex", :interval => intervalArray[0])
-                if currentRecord then currentRecord.update(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0])
-                else Candlestick.create(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0]) end
               end
             end
             
-            break # Skip checking of other pairsToPull pairs since match has been found.
+            # Go to next if not able to support that interval
+            unless supportedIntervals.include?(pullInterval) then next end
+            
+            # Sleeps to prevent more than 6 requests per second (Poloniex limit)
+            while ((Time.now.to_f * 1000.0) - (requestStart.to_f * 1000.0) < 167) do sleep 0.01 end
+            requestStart = Time.now
+            
+            # Request candlestick data
+            candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{pullInterval}")))
+            
+            # Merge candlesticks if pulling an interval that isn't natively supported by Poloniex
+            unless supportedIntervals.include?(intervalArray[0])
+              newClose = newHigh = 0
+              newLow = Float::INFINITY
+              toBeMerged = false
+              candlestickData.reverse_each do |candlestick|
+                if candlestick["date"] % intervalArray[0] == 0 && toBeMerged
+                  candlestick["close"] = newClose
+                  candlestick["low"] = [newLow, candlestick["low"]].min
+                  candlestick["high"] = [newHigh, candlestick["high"]].max
+                  newClose = newHigh = 0
+                  newLow = Float::INFINITY
+                  toBeMerged = false
+                else
+                  newLow = [newLow, candlestick["low"]].min
+                  newHigh = [newHigh, candlestick["high"]].max
+                  unless toBeMerged
+                    toBeMerged = true
+                    newClose = candlestick["close"]
+                  end
+                  candlestickData.delete(candlestick)
+                end
+              end
+            end
+            
+            # Check if each candlestick already exists in database. Then add if it doesn't and update if it does.
+            candlestickData.each do |candlestick|
+              time = Time.at(candlestick["date"])
+              currentRecord = Candlestick.find_by(:timestamp => time, :pair => ticker[0], :exchange => "Poloniex", :interval => intervalArray[0])
+              if currentRecord then currentRecord.update(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0])
+              else Candlestick.create(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0]) end
+            end
+          end
         end
         
       end
@@ -214,8 +212,6 @@ module Workspace
                 end
               end
             end
-            
-            break # Skip checking of other pairsToPull pairs since match has been found.
           end
           
         end
