@@ -9,7 +9,7 @@ class ExchangesController < ApplicationController
       pair = params[:p]
     end
     
-    if( params[:tf] == nil )    # This logic sets the default timeframe to 1 hour
+    if( params[:tf] == nil )    # This logic sets the default timeframe to 6 hours
       @frame = 6.hours          # It also avoids a nil value being assigned to @frame
     else
       @frame = eval(params[:tf])
