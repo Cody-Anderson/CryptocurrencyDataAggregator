@@ -7,9 +7,7 @@ $(document).on('turbolinks:load', function() {
     
     var pair = p1 + "/" + p2;           // Form chart title from passed-in
     var exchange = pair + " - " + ex;     // exchange and pair
-    
-    
-    
+
     for( var i = 0; i < arr.length; i++ ) {     // Convert each passed-in time string to
         arr[i][0] = new Date(arr[i][0]);        // a date object
     }

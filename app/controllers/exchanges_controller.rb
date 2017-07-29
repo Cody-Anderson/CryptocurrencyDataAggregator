@@ -27,7 +27,7 @@ class ExchangesController < ApplicationController
       when 1.day
         interval = 3600     # For a day-long timeframe, use 30 minute candles
       when 1.week
-        interval = 14400    # For a week-long timeframe, use 4 hour candles
+        interval = 43200    # For a week-long timeframe, use 12 hour candles
       when 1.month
         interval = 86400    # For a month-long timeframe, use 24 hour candles
     end
