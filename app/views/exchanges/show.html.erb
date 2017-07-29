@@ -1,16 +1,23 @@
-
+<!-- This is the tag that holds the chart -->
 <div id="chart_div" style="width: 1200px; height: 600px;"></div>
 
 <div id="buttons">
+<!-- These are the buttons that manipulate the graph sets and properties -->
+<!-- I plan to have the exchange buttons on the right, and the timeframe buttons on the bottom -->
 <%= link_to "BTC/ETH", exchange_path( :x => @exchange, :p => "BTC_ETH" ), { :class=>"exchange_button" } %><br><br><br>
 <%= link_to "BTC/XMR", exchange_path( :x => @exchange, :p => "BTC_XMR" ), { :class=>"exchange_button" } %><br><br><br>
 <%= link_to "BTC/DASH", exchange_path( :x => @exchange, :p => "BTC_DASH" ), { :class=>"exchange_button" } %><br><br><br>
 <%= link_to "BTC/LTC", exchange_path( :x => @exchange, :p => "BTC_LTC" ), { :class=>"exchange_button" } %><br><br><br>
 <%= link_to "BTC/XRP", exchange_path( :x => @exchange, :p => "BTC_XRP" ), { :class=>"exchange_button" } %><br><br><br>
 <%= link_to "BTC/ZEC", exchange_path( :x => @exchange, :p => "BTC_ZEC" ), { :class=>"exchange_button" } %><br><br><br>
-<%= link_to "BTC/SC", exchange_path( :x => @exchange, :p => "BTC_SC" ), { :class=>"exchange_button" } %>
+<%= link_to "BTC/SC", exchange_path( :x => @exchange, :p => "BTC_SC" ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "6h", exchange_path( :x => @exchange, :p => @pair, :tf => 6.hours ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "1D", exchange_path( :x => @exchange, :p => @pair, :tf => 1.day ), { :class=>"exchange_button" } %>
+<!-- There will be a week-long and month-long timeframe button once longer timeframes have been reliably collected -->
 </div>
 
+<!-- These are tags that hold data from the controller -->
+<!-- candleChart.js will use this data to form the graph -->
 <div id="candles" data-temp="<%= @candles.to_json %>" />
 <div id="exchange" data-temp=<%= raw @exchange.to_json %> />
 <div id="pair1" data-temp=<%= raw @pair1.to_json %> />
