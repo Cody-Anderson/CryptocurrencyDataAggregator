@@ -23,9 +23,11 @@
         text-align: center;
     }
 </style>
-
+<head>
+<%= favicon_link_tag 'favicon.ico' %>
+</head>
 <div style="margin: 0 auto; width: 1030px;">
-    <a href = "/"><div><img src='/images/cryptogator.png'></img></div></a>
+    <a href = "/"><div><img src='/images/cryptogator.png' onmouseover="this.src='/images/cryptogator_selected.png';" onmouseout="this.src='/images/cryptogator.png';"/></img></div></a>
 </div>
 <br>
 <div style="margin: 0 auto; width: 650px;">
