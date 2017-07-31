@@ -1,34 +1,78 @@
 <!DOCTYPE html>
 <html>
     <script language="javascript">
-      function toggle(s) {
-        if(s === 'web') {
-            var a = document.getElementById('phone');
-            var b = document.getElementById('pc');
-        }
-        else if(s === 'phone') {
-            var a = document.getElementById('web');
-            var b = document.getElementById('pc');
-        }
-        else {
-            var a = document.getElementById('web');
-            var b = document.getElementById('phone');
-        }
-        var e = document.getElementById(s);
-        var displaySetting = e.style.display;
-        var button = document.getElementById(s + 'Btn');
-				
-        if (displaySetting == 'block') {
-            e.style.display = 'none';
-            //a.style.display = 'block';
-            //b.style.display = 'block';
-        }
-        else { 
-            e.style.display = 'block';
-            a.style.display = 'none';
-            b.style.display = 'none';
-        }
-      }  
+      var bitcoincore = document.getElementById("bitcoincore");
+      bitcoincore.addEventListener("mouseover", bitcoincoreMouseover, false);
+      bitcoincore.addEventListener("mouseout", bitcoincoreMouseout, false);
+      
+      function bitcoincoreMouseover() {
+          document.getElementById("bitcoincore_curr").setAttribute("style", "display:block;")
+      }
+      
+      function bitcoincoreMouseout() {
+          document.getElementById("bitcoincore_curr").setAttribute("style", "display:none;")
+      }
+      
+      var coinbase = document.getElementById("coinbase");
+      coinbase.addEventListener("mouseover", coinbaseMouseover, false);
+      coinbase.addEventListener("mouseout", coinbaseMouseout, false);
+      
+      function coinbaseMouseover() {
+          document.getElementById("coinbase_curr").setAttribute("style", "display:block;")
+      }
+      
+      function coinbaseMouseout() {
+          document.getElementById("coinbase_curr").setAttribute("style", "display:none;")
+      }
+      
+      var greenaddress = document.getElementById("greenaddress");
+      greenaddress.addEventListener("mouseover", greenaddressMouseover, false);
+      greenaddress.addEventListener("mouseout", greenaddressMouseout, false);
+      
+      function greenaddressMouseover() {
+          document.getElementById("bitcoincore_curr").setAttribute("style", "display:block;")
+      }
+      
+      function greenaddressMouseout() {
+          document.getElementById("bitcoincore_curr").setAttribute("style", "display:none;")
+      }
+      
+      var litecoin = document.getElementById("litecoin");
+      litecoin.addEventListener("mouseover", litecoinMouseover, false);
+      litecoin.addEventListener("mouseout", litecoinMouseout, false);
+      
+      function litecoinMouseover() {
+          document.getElementById("litecoin_curr").setAttribute("style", "display:block;")
+      }
+      
+      function litecoinMouseout() {
+          document.getElementById("litecoin_curr").setAttribute("style", "display:none;")
+      }
+      
+      var exodus = document.getElementById("exodus");
+      exodus.addEventListener("mouseover", exodusMouseover, false);
+      exodus.addEventListener("mouseout", exodusMouseout, false);
+      
+      function exodusMouseover() {
+          document.getElementById("coinbase_curr").setAttribute("style", "display:block;")
+      }
+      
+      function exodusMouseout() {
+          document.getElementById("coinbase_curr").setAttribute("style", "display:none;")
+      }
+      
+      var myether = document.getElementById("myether");
+      myether.addEventListener("mouseover", myetherMouseover, false);
+      myether.addEventListener("mouseout", myetherMouseout, false);
+      
+      function myetherMouseover() {
+          document.getElementById("myether_curr").setAttribute("style", "display:block;")
+      }
+      
+      function myetherMouseout() {
+          document.getElementById("myether_curr").setAttribute("style", "display:none;")
+      }
+      
     </script>
     <style>
         div#web {
@@ -38,6 +82,18 @@
             display: none;
         }
         div#pc {
+            display: none;
+        }
+        div#bitcoincore_curr {
+            display: none;
+        }
+        div#coinbase_curr {
+            display: none;
+        }
+        div#litecoin_curr {
+            display: none;
+        }
+        div#myether_curr {
             display: none;
         }
     </style>
@@ -50,10 +106,16 @@
         <%= render "header/header" %>
         <br><br>
         <div style="margin: 0 auto; width: 850px;" >
-                <a href = "https://bitcoin.org/en/download" target = "_blank"><img src='/images/wallet buttons/bitcoincore_unselected.png' onmouseover="this.src='/images/wallet buttons/bitcoincore_selected.png';" onmouseout="this.src='images/wallet buttons/bitcoincore_unselected.png';"/></a>
-                <a href = "https://www.coinbase.com/mobile?locale=en-US" target = "_blank"><img src='/images/wallet buttons/coinbasemobile_unselected.png' onmouseover="this.src='/images/wallet buttons/coinbasemobile_selected.png';" onmouseout="this.src='images/wallet buttons/coinbasemobile_unselected.png';"/></a>
-                <a href = "https://greenaddress.it/en/" target = "_blank"><img src='/images/wallet buttons/green_unselected.png' onmouseover="this.src='/images/wallet buttons/green_selected.png';" onmouseout="this.src='images/wallet buttons/green_unselected.png';"/></a>
-                <a href = "https://litecoin.org/" target = "_blank"><img src='/images/wallet buttons/lite_unselected.png' onmouseover="this.src='/images/wallet buttons/lite_selected.png';" onmouseout="this.src='images/wallet buttons/lite_unselected.png';"/></a>
+                <a href = "https://bitcoin.org/en/download" target = "_blank"><img id='bitcoincore' src='/images/wallet buttons/bitcoincore_unselected.png' onmouseover="this.src='/images/wallet buttons/bitcoincore_selected.png';" onmouseout="this.src='images/wallet buttons/bitcoincore_unselected.png';"/></a>
+                <a href = "https://www.coinbase.com/mobile?locale=en-US" target = "_blank"><img id='coinbase' src='/images/wallet buttons/coinbasemobile_unselected.png' onmouseover="this.src='/images/wallet buttons/coinbasemobile_selected.png';" onmouseout="this.src='images/wallet buttons/coinbasemobile_unselected.png';"/></a>
+                <a href = "https://greenaddress.it/en/" target = "_blank"><img id='greenaddress' src='/images/wallet buttons/green_unselected.png' onmouseover="this.src='/images/wallet buttons/green_selected.png';" onmouseout="this.src='images/wallet buttons/green_unselected.png';"/></a>
+                <a href = "https://litecoin.org/" target = "_blank"><img id='litecoin' src='/images/wallet buttons/lite_unselected.png' onmouseover="this.src='/images/wallet buttons/lite_selected.png';" onmouseout="this.src='images/wallet buttons/lite_unselected.png';"/></a>
+                <a href = "https://www.exodus.io/" target = "_blank"><img id='exodus' src='/images/wallet buttons/exodus_unselected.png' onmouseover="this.src='/images/wallet buttons/exodus_selected.png';" onmouseout="this.src='images/wallet buttons/exodus_unselected.png';"/></a>
+                <a href = "https://www.myetherwallet.com/" target = "_blank"><img id='myether' src='/images/wallet buttons/myether_unselected.png' onmouseover="this.src='/images/wallet buttons/myether_selected.png';" onmouseout="this.src='images/wallet buttons/myether_unselected.png';"/></a>
+                <div id='bitcoincore_curr' style="margin: 0 auto; width: 840px;"><img src='/images/wallet buttons/bitcoincore_curr.png'/></div>
+                <div id='coinbase_curr' style="margin: 0 auto; width: 840px;"><img src='/images/wallet buttons/coinbase_curr.png'/></div>
+                <div id='litecoin_curr' style="margin: 0 auto; width: 840px;"><img src='/images/wallet buttons/litecoin_curr.png'/></div>
+                <div id='myether_curr' style="margin: 0 auto; width: 840px;"><img src='/images/wallet buttons/myether_curr.png'/></div>
         </div>
     </body>
 </html>
