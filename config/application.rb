@@ -65,18 +65,8 @@ module Workspace
         if pairsToPull.include?(ticker[0])
           timeToPull.each do |intervalArray|
               
-            # Set pull interval to highest factor of intervalArray[0] if possible
-            pullInterval = intervalArray[0]
-            unless supportedIntervals.include?(intervalArray[0])
-              supportedIntervals.reverse_each do |interval|
-                if intervalArray[0] % interval == 0
-                  pullInterval = interval
-                  break
-                end
-              end
-            end
-            
-            # Go to next if not able to support that interval
+            # Attempt to set pullInterval to largest factor of intervalArray[0] that is present in supportedIntervals
+            pullInterval = getCompatibleInterval(intervalArray[0], supportedIntervals)
             unless supportedIntervals.include?(pullInterval) then next end
             
             # Sleeps to prevent more than 6 requests per second (Poloniex limit)
@@ -137,16 +127,9 @@ module Workspace
           if pairsToPull.include?(ticker["MarketName"].sub('-','_'))
             timeToPull.each do |intervalArray|
                 
-              # Set pull interval to highest factor of intervalArray[0] if possible
-              pullInterval = intervalArray[0]
-              unless supportedIntervals.include?(intervalArray[0])
-                supportedIntervals.reverse_each do |interval|
-                  if intervalArray[0] % interval == 0
-                    pullInterval = interval
-                    break
-                  end
-                end
-              end
+              # Attempt to set pullInterval to largest factor of intervalArray[0] that is present in supportedIntervals
+              pullInterval = getCompatibleInterval(intervalArray[0], supportedIntervals)
+              unless supportedIntervals.include?(pullInterval) then next end
               
               # Go to next if not able to support that interval
               unless supportedIntervals.include?(pullInterval) then next end
@@ -200,15 +183,9 @@ module Workspace
                   end
                 end
                 
+                # Store/update candlestick data
                 candlestickData.each do |candlestick|
-                    
-                  # Create variable to hold timestamp with time zone
-                  time = Time.at(DateTime.parse(candlestick["T"]).to_time.to_i)
-                  
-                  # Check if candlestick already exists in database. Then add if it doesn't.
-                  currentRecord = Candlestick.find_by(:timestamp => time, :pair => ticker["MarketName"].sub('-','_'), :exchange => "Bittrex", :interval => intervalArray[0])
-                  if currentRecord then currentRecord.update(:exchange => "Bittrex", :pair => ticker["MarketName"].sub('-','_'), :timestamp => time, :open => candlestick["O"], :high => candlestick["H"], :low => candlestick["L"], :close => candlestick["C"], :interval => intervalArray[0])
-                  else Candlestick.create(:exchange => "Bittrex", :pair => ticker["MarketName"].sub('-','_'), :timestamp => time, :open => candlestick["O"], :high => candlestick["H"], :low => candlestick["L"], :close => candlestick["C"], :interval => intervalArray[0]) end
+                  addCandlestick("Bittrex", ticker["MarketName"].sub('-','_'), Time.at(time_To_Seconds(candlestick["T"])), candlestick["O"], candlestick["H"], candlestick["L"], candlestick["C"], intervalArray[0])
                 end
               end
             end
@@ -219,5 +196,24 @@ module Workspace
       puts "Finished retrieval and storage of Bittrex data."
     end
     
+    def addCandlestick(exchange, pair, time, openPrice, high, low, close, interval)
+      # Check if candlestick already exists in database. Then add if it doesn't.
+      currentRecord = Candlestick.find_by(:timestamp => time, :pair => pair, :exchange => exchange, :interval => interval)
+      if currentRecord then currentRecord.update(:exchange => exchange, :pair => pair, :timestamp => time, :open => openPrice, :high => high, :low => low, :close => close, :interval => interval)
+      else Candlestick.create(:exchange => exchange, :pair => pair, :timestamp => time, :open => openPrice, :high => high, :low => low, :close => close, :interval => interval) end
+    end
+    
+    # Find highest possible factor of desiredInterval in supportedIntervals array.
+    def getCompatibleInterval(desiredInterval, supportedIntervals)
+      supportedIntervals.reverse_each do |interval|
+        if desiredInterval % interval == 0 then return interval end
+      end
+      return 0 # Return 0 if impossible interval
+    end
+    
+    # Converts Bittrex time to seconds timestamp
+    def time_To_Seconds(time)
+        return DateTime.parse(time).to_time.to_i
+    end
   end
 end
