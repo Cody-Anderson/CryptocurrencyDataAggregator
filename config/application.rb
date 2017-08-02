@@ -76,38 +76,14 @@ module Workspace
             # Request candlestick data
             candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{pullInterval}")))
             
-            # Merge candlesticks if pulling an interval that isn't natively supported by Poloniex
-            unless supportedIntervals.include?(intervalArray[0])
-              newClose = newHigh = 0
-              newLow = Float::INFINITY
-              toBeMerged = false
-              candlestickData.reverse_each do |candlestick|
-                if candlestick["date"] % intervalArray[0] == 0 && toBeMerged
-                  candlestick["close"] = newClose
-                  candlestick["low"] = [newLow, candlestick["low"]].min
-                  candlestick["high"] = [newHigh, candlestick["high"]].max
-                  newClose = newHigh = 0
-                  newLow = Float::INFINITY
-                  toBeMerged = false
-                else
-                  newLow = [newLow, candlestick["low"]].min
-                  newHigh = [newHigh, candlestick["high"]].max
-                  unless toBeMerged
-                    toBeMerged = true
-                    newClose = candlestick["close"]
-                  end
-                  candlestickData.delete(candlestick)
-                end
-              end
-            end
+            # Merge candlesticks if pulling an interval that isn't natively supported.
+            unless supportedIntervals.include?(intervalArray[0]) then candlestickData = merge_Candlesticks(candlestickData, intervalArray[0], "high", "low", "close", "date") end
             
             # Check if each candlestick already exists in database. Then add if it doesn't and update if it does.
             candlestickData.each do |candlestick|
-              time = Time.at(candlestick["date"])
-              currentRecord = Candlestick.find_by(:timestamp => time, :pair => ticker[0], :exchange => "Poloniex", :interval => intervalArray[0])
-              if currentRecord then currentRecord.update(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0])
-              else Candlestick.create(:exchange => "Poloniex", :pair => ticker[0], :timestamp => time, :open => candlestick["open"], :high => candlestick["high"], :low => candlestick["low"], :close => candlestick["close"], :interval => intervalArray[0]) end
+              addCandlestick("Poloniex", ticker[0], Time.at(candlestick["date"]), candlestick["open"], candlestick["high"], candlestick["low"], candlestick["close"], intervalArray[0])
             end
+            
           end
         end
         
@@ -131,18 +107,11 @@ module Workspace
               pullInterval = getCompatibleInterval(intervalArray[0], supportedIntervals)
               unless supportedIntervals.include?(pullInterval) then next end
               
-              # Go to next if not able to support that interval
+              # Go to next if not able to support that interval.
               unless supportedIntervals.include?(pullInterval) then next end
                 
-              # Convert time interval to Bittrex-compatible time period in words
-              intervalWords = case pullInterval
-              when 60 then "oneMin"
-              when 300 then "fiveMin"
-              when 1800 then "thirtyMin"
-              when 3600 then "hour"
-              when 86400 then "day"
-              else next
-              end
+              # Convert time interval to Bittrex-compatible time period in words.
+              intervalWords = convert_Intervals_to_Bittrex_Words(pullInterval)
               
               # Request candlestick data at five minute intervals.
               candlestickData = JSON.parse(Net::HTTP.get(URI("https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=#{ticker["MarketName"]}&tickInterval=#{intervalWords}")))
@@ -150,43 +119,17 @@ module Workspace
               if candlestickData["success"]
                 candlestickData = candlestickData["result"]
                 
-                # Remove all entries that are too old from candlestickData
-                temp = []
-                candlestickData.reverse_each do |candlestick|
-                  if (Time.now.to_i - DateTime.parse(candlestick["T"]).to_time.to_i > intervalArray[1]) then break
-                  else temp.push(candlestick) end
-                end
-                candlestickData = temp.reverse
-                
-                # Merge candlesticks if pulling an interval that isn't natively supported by Poloniex
-                unless supportedIntervals.include?(intervalArray[0])
-                  newClose = newHigh = 0
-                  newLow = Float::INFINITY
-                  toBeMerged = false
-                  candlestickData.reverse_each do |candlestick|
-                    if DateTime.parse(candlestick["T"]).to_time.to_i % intervalArray[0] == 0 && toBeMerged
-                      candlestick["C"] = newClose
-                      candlestick["L"] = [newLow, candlestick["L"]].min
-                      candlestick["H"] = [newHigh, candlestick["H"]].max
-                      newClose = newHigh = 0
-                      newLow = Float::INFINITY
-                      toBeMerged = false
-                    else
-                      newLow = [newLow, candlestick["L"]].min
-                      newHigh = [newHigh, candlestick["H"]].max
-                      unless toBeMerged
-                        toBeMerged = true
-                        newClose = candlestick["C"]
-                      end
-                      candlestickData.delete(candlestick)
-                    end
-                  end
-                end
+                # Remove all entries at the front of candlestickData that are too old.
+                candlestickData = cleanup_Old_Candlesticks_Front("T", intervalArray[1], candlestickData)
+
+                # Merge candlesticks if pulling an interval that isn't natively supported.
+                unless supportedIntervals.include?(intervalArray[0]) then candlestickData = merge_Candlesticks(candlestickData, intervalArray[0], "H", "L", "C", "T") end
                 
                 # Store/update candlestick data
                 candlestickData.each do |candlestick|
                   addCandlestick("Bittrex", ticker["MarketName"].sub('-','_'), Time.at(time_To_Seconds(candlestick["T"])), candlestick["O"], candlestick["H"], candlestick["L"], candlestick["C"], intervalArray[0])
                 end
+                
               end
             end
           end
@@ -211,9 +154,60 @@ module Workspace
       return 0 # Return 0 if impossible interval
     end
     
-    # Converts Bittrex time to seconds timestamp
+    # Converts Bittrex time to seconds timestamp.
     def time_To_Seconds(time)
-        return DateTime.parse(time).to_time.to_i
+      if time.is_a? Integer then return time else return DateTime.parse(time).to_time.to_i end
     end
+    
+    # Return array that only includes candlesticks timePeriod seconds ago.
+    # Works faster when there is a larger amount of old candlesticks at the front of the array.
+    def cleanup_Old_Candlesticks_Front(timeMarker, timePeriod, candlestickData)
+      temp = []
+      candlestickData.reverse_each do |candlestick|
+        if (Time.now.to_i - DateTime.parse(candlestick[timeMarker]).to_time.to_i > timePeriod) then break
+        else temp.push(candlestick) end
+      end
+      return temp.reverse
+    end
+    
+    # Merge candlesticks into desiredInterval
+    def merge_Candlesticks(candlestickData, desiredInterval, highSymbol, lowSymbol, closeSymbol, timeSymbol)
+      newClose = newHigh = 0
+      newLow = Float::INFINITY
+      toBeMerged = false
+      
+      candlestickData.reverse_each do |candlestick|
+        if time_To_Seconds(candlestick[timeSymbol]) % desiredInterval == 0 && toBeMerged
+          candlestick[closeSymbol] = newClose
+          candlestick[lowSymbol] = [newLow, candlestick[lowSymbol]].min
+          candlestick[highSymbol] = [newHigh, candlestick[highSymbol]].max
+          newClose = newHigh = 0
+          newLow = Float::INFINITY
+          toBeMerged = false
+        else
+          newLow = [newLow, candlestick[lowSymbol]].min
+          newHigh = [newHigh, candlestick[highSymbol]].max
+          unless toBeMerged
+            toBeMerged = true
+            newClose = candlestick[closeSymbol]
+          end
+          candlestickData.delete(candlestick)
+        end
+      end
+      
+      return candlestickData
+    end
+    
+    # Convert pullInterval to Bittrex-request-compatible text
+    def convert_Intervals_to_Bittrex_Words(pullInterval)
+      return case pullInterval
+      when 60 then "oneMin"
+      when 300 then "fiveMin"
+      when 1800 then "thirtyMin"
+      when 3600 then "hour"
+      when 86400 then "day"
+      end
+    end
+    
   end
 end
