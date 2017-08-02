@@ -35,6 +35,26 @@ module Workspace
           timeToPull = [[300, 60*60*24 + 300], [3600, 60*60*24*7 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
           pairsToPull = ["BTC_ETH", "BTC_XMR", "BTC_DASH", "BTC_LTC", "BTC_XRP", "BTC_ZEC", "BTC_SC"]
           
+          # Bitfinex has different formatting for pairs, so this hash enables correct data pulling
+          bfx_pair = {
+            'BTC_ETH'  => 'ETHBTC',
+            'BTC_XMR'  => 'XMRBTC',
+            'BTC_DASH' => 'DSHBTC',
+            'BTC_LTC'  => 'LTCBTC',
+            'BTC_XRP'  => 'XRPBTC'
+          }
+          
+          # Bitfinex has different formatting for time intervals, this array accounts for that
+          bfx_time = [
+            [ '5m', 300, 72 ],
+            [ '1h', 3600, 24 ],
+            [ '12h', 43200, 14 ],
+            [ '1D', 86400, 30 ],
+          ]
+          
+          # Sets a variable to keep track of the loops
+          first_loop = true
+          
           loop do
             
             pullPoloniex(timeToPull, pairsToPull)
@@ -45,11 +65,60 @@ module Workspace
               intervalArray[1] = intervalArray[0] * 2
             end
             
-            sleep 5 # Sleep time in seconds
+            # Main loop that pulls data from Bitfinex
+            # Nested loop so each pair/interval combo gets pulled
+            bfx_pair.each do |k, v|
+              bfx_time.each do |t|
+                # Only pulls the two most-recent intervals after the first loop (saves time)
+                if( first_loop )
+                  bitfinex_pull( k, v, t[0], t[1], t[2] )
+                else
+                  bitfinex_pull( k, v, t[0], t[1], 2 )
+                end
+              end
+            end
+            
+            # No longer the first loop
+            first_loop = false;
+            
+            sleep 120 # Sleep time in seconds
           end
           
         end
       end
+    end
+    
+    # Grab data from Bitfinex
+    def bitfinex_pull( pr1, pr2, int, int2, quant )
+      # Data pulled, parsed from JSON
+      parsed_tick_vals = JSON.parse(Net::HTTP.get(URI("https://api.bitfinex.com/v2/candles/trade:#{int}:t#{pr2}/hist?limit=#{quant}")))
+      
+      # For each tick
+      parsed_tick_vals.each do |tick|
+        time = Time.at(tick[0] / 1000).to_datetime  # Converts the epoch timestamp to datetime
+        puts "preparing to add one of many"
+        
+        # Checks if a candle with the same timestamp and interval exists in the database
+        # Also checks of the value of the candle has changed
+        if( Candlestick.exists?( :exchange => 'Bitfinex', :pair => pr1, :interval => int2, :timestamp => time ) )
+          if( Candlestick.exists?( :exchange => 'Bitfinex', :pair => pr1, :interval => int2, :timestamp => time,
+                                  :low => tick[4], :open => tick[1], :close => tick[2], :high => tick[3] ) )
+            puts "candle already exists, and has the same values"
+          else
+            # If the value of the candle has changed, overwrite the entry
+            puts "overwriting outdated entry"
+            Candlestick.where( :exchange => 'Bitfinex', :pair => pr1, :interval => int2, :timestamp => time ).destroy_all
+            candle_tick = Candlestick.new( :exchange => 'Bitfinex', :pair => pr1, :low => tick[4], :open => tick[1], :close => tick[2], :high => tick[3], :timestamp => time, :interval => int2 )
+            candle_tick.save
+          end
+        else
+          # The candle does not exist, so write to database
+          puts "candle does not exist - add to database"
+          candle_tick = Candlestick.new( :exchange => 'Bitfinex', :pair => pr1, :low => tick[4], :open => tick[1], :close => tick[2], :high => tick[3], :timestamp => time, :interval => int2 )
+          candle_tick.save
+        end
+      end
+      puts "finished adding values for this interval"
     end
     
     # Get Poloniex candlestick data for all markets, limit to 6 HTTP requests per second, and write all candlesticks to database, skipping candlesticks that are already in database.
