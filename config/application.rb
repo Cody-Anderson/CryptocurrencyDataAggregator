@@ -46,10 +46,10 @@ module Workspace
           
           # Bitfinex has different formatting for time intervals, this array accounts for that
           bfx_time = [
-            [ '5m', 300, 72 ],
-            [ '1h', 3600, 24 ],
-            [ '12h', 43200, 14 ],
-            [ '1D', 86400, 30 ],
+            [ '5m',   300,    72, 6.hours ],
+            [ '1h',   3600,   24, 1.day   ],
+            [ '12h',  43200,  14, 1.week  ],
+            [ '1D',   86400,  30, 1.month ],
           ]
           
           # Sets a variable to keep track of the loops
@@ -75,6 +75,13 @@ module Workspace
                 else
                   bitfinex_pull( k, v, t[0], t[1], 2 )
                 end
+              end
+            end
+            
+            # Removes candles when they become so old that they are no longer displayed
+            bfx_time.each do |t|
+              if( Candlestick.exists?( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[3] ), :interval => t[1] ) )
+                Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[3] ), :interval => t[1] ).destroy_all
               end
             end
             
