@@ -34,3 +34,15 @@ Then(/^I should see the currency price history$/) do
     page.should have_selector("div", :id=>'pair1')
     page.should have_selector("div", :id => 'pair2')
 end
+
+
+
+When(/^I am on the about page$/) do
+    visit "/about"
+end
+
+Then(/^I should see a github link$/) do
+    page.should have_selector("a", :id=>'github')
+end
+
+
