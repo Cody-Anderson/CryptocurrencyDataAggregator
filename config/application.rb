@@ -57,7 +57,7 @@ module Workspace
           
           loop do
             
-            pullPoloniex(timeToPull, pairsToPull)
+            # pullPoloniex(timeToPull, pairsToPull)
             pullBittrex(timeToPull, pairsToPull)
             
             # Set time to pull to slightly larger than two intervals
