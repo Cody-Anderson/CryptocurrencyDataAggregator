@@ -2,6 +2,7 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 require 'net/http'
+require 'timeout'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -32,7 +33,7 @@ module Workspace
           
           # Format: [[timeIntervalInSeconds, numberOfSeconds], [timeIntervalInSeconds, numberOfSeconds]]
           # Supported timeIntervalInSeconds values are any multiple of 300.
-          timeToPull = [[300, 60*60*24 + 300], [3600, 60*60*24*7 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
+          timeToPull = [[300, 60*60*6 + 300], [3600, 60*60*24 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
           pairsToPull = ["BTC_ETH", "BTC_XMR", "BTC_DASH", "BTC_LTC", "BTC_XRP", "BTC_ZEC", "BTC_SC"]
           
           # Bitfinex has different formatting for pairs, so this hash enables correct data pulling
@@ -57,7 +58,7 @@ module Workspace
           
           loop do
             
-            # pullPoloniex(timeToPull, pairsToPull)
+            pullPoloniex(timeToPull, pairsToPull)
             pullBittrex(timeToPull, pairsToPull)
             
             # Set time to pull to slightly larger than two intervals
@@ -79,9 +80,9 @@ module Workspace
             end
             
             # Removes candles when they become so old that they are no longer displayed
-            bfx_time.each do |t|
-              if( Candlestick.exists?( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[3] ), :interval => t[1] ) )
-                Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[3] ), :interval => t[1] ).destroy_all
+            timeToPull.each do |t|
+              if( Candlestick.exists?( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ) )
+                Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ).destroy_all
               end
             end
             
@@ -98,7 +99,8 @@ module Workspace
     # Grab data from Bitfinex
     def bitfinex_pull( pr1, pr2, int, int2, quant )
       # Data pulled, parsed from JSON
-      parsed_tick_vals = JSON.parse(Net::HTTP.get(URI("https://api.bitfinex.com/v2/candles/trade:#{int}:t#{pr2}/hist?limit=#{quant}")))
+      parsed_tick_vals = http_With_Timeout("https://api.bitfinex.com/v2/candles/trade:#{int}:t#{pr2}/hist?limit=#{quant}")
+      unless parsed_tick_vals then return end
       
       # For each tick
       parsed_tick_vals.each do |tick|
@@ -131,8 +133,11 @@ module Workspace
     # Get Poloniex candlestick data for all markets, limit to 6 HTTP requests per second, and write all candlesticks to database, skipping candlesticks that are already in database.
     def pullPoloniex(timeToPull, pairsToPull)
       requestStart = Time.now # Time in seconds
-      allPoloniexTickers = JSON.parse(Net::HTTP.get(URI('https://poloniex.com/public?command=returnTicker')))
       supportedIntervals = [300, 900, 1800, 7200, 14400, 86400] # Intervals supported by Poloniex
+      
+      # Get all tickers
+      allPoloniexTickers = http_With_Timeout("https://poloniex.com/public?command=returnTicker")
+      unless allPoloniexTickers then return end
       
       # Loop for each currency pair in the Poloniex market.
       allPoloniexTickers.each do |ticker|
@@ -150,7 +155,8 @@ module Workspace
             requestStart = Time.now
             
             # Request candlestick data
-            candlestickData = JSON.parse(Net::HTTP.get(URI("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{pullInterval}")))
+            candlestickData = http_With_Timeout("https://poloniex.com/public?command=returnChartData&currencyPair=#{ticker[0]}&start=#{requestStart.to_i - intervalArray[1]}&end=9999999999&period=#{pullInterval}")
+            unless candlestickData then return end
             
             # Merge candlesticks if pulling an interval that isn't natively supported.
             unless supportedIntervals.include?(intervalArray[0]) then candlestickData = merge_Candlesticks(candlestickData, intervalArray[0], "high", "low", "close", "date") end
@@ -169,8 +175,11 @@ module Workspace
     
     # Get Bittrex candlestick data for all markets and write all candlesticks to database, skipping candlesticks that are already in database.
     def pullBittrex(timeToPull, pairsToPull)
-      allBittrexTickers = JSON.parse(Net::HTTP.get(URI('https://bittrex.com/api/v1.1/public/getmarketsummaries')))
       supportedIntervals = [60, 300, 1800, 3600, 86400]
+      
+      # Request to get all Bittrex tickers
+      allBittrexTickers = http_With_Timeout("https://bittrex.com/api/v1.1/public/getmarketsummaries")
+      unless allBittrexTickers then return end
       
       if allBittrexTickers["success"]
         allBittrexTickers["result"].each do |ticker|
@@ -190,7 +199,8 @@ module Workspace
               intervalWords = convert_Intervals_to_Bittrex_Words(pullInterval)
               
               # Request candlestick data at five minute intervals.
-              candlestickData = JSON.parse(Net::HTTP.get(URI("https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=#{ticker["MarketName"]}&tickInterval=#{intervalWords}")))
+              candlestickData = http_With_Timeout("https://bittrex.com/Api/v2.0/pub/market/GetTicks?marketName=#{ticker["MarketName"]}&tickInterval=#{intervalWords}")
+              unless candlestickData then return end
             
               if candlestickData["success"]
                 candlestickData = candlestickData["result"]
@@ -213,6 +223,17 @@ module Workspace
         end
       end
       puts "Finished retrieval and storage of Bittrex data."
+    end
+    
+    # Make HTTP get request, timeout if it takes too long
+    def http_With_Timeout(url)
+      begin
+        Timeout::timeout(5) do
+          return JSON.parse(Net::HTTP.get(URI(url)))
+        end
+      rescue Timeout::Error
+        return false
+      end
     end
     
     def addCandlestick(exchange, pair, time, openPrice, high, low, close, interval)
