@@ -29,13 +29,56 @@ module Workspace
     
     if defined?(Rails::Server)
       config.after_initialize do
+        # Format: [[timeIntervalInSeconds, numberOfSeconds], [timeIntervalInSeconds, numberOfSeconds]]
+        # Supported timeIntervalInSeconds values are any multiple of 300.
+        timeToPull = [[300, 60*60*6 + 300], [3600, 60*60*24 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
+        pairsToPull = ["BTC_ETH", "BTC_XMR", "BTC_DASH", "BTC_LTC", "BTC_XRP", "BTC_ZEC", "BTC_SC"]
+        
+        # Bittrex update thread
         Thread.new do
-          
-          # Format: [[timeIntervalInSeconds, numberOfSeconds], [timeIntervalInSeconds, numberOfSeconds]]
-          # Supported timeIntervalInSeconds values are any multiple of 300.
-          timeToPull = [[300, 60*60*6 + 300], [3600, 60*60*24 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
-          pairsToPull = ["BTC_ETH", "BTC_XMR", "BTC_DASH", "BTC_LTC", "BTC_XRP", "BTC_ZEC", "BTC_SC"]
-          
+          bittrexTimeToPull = timeToPull
+          loop do
+            pullBittrex(bittrexTimeToPull, pairsToPull)
+            
+            # Set time to pull to slightly larger than two intervals
+            bittrexTimeToPull.each do |intervalArray|
+              intervalArray[1] = intervalArray[0] * 2
+            end
+            
+            sleep 10
+          end
+        end
+        
+        # Poloniex update thread
+        Thread.new do
+          poloniexTimeToPull = timeToPull
+          loop do
+            pullPoloniex(poloniexTimeToPull, pairsToPull)
+            
+            # Set time to pull to slightly larger than two intervals
+            poloniexTimeToPull.each do |intervalArray|
+              intervalArray[1] = intervalArray[0] * 2
+            end
+            
+            sleep 10
+          end
+        end
+        
+        # Cleanup thread - removes candles when they become so old that they are no longer displayed
+        Thread.new do
+          loop do
+            timeToPull.each do |t|
+              if( Candlestick.exists?( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ) )
+                Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ).destroy_all
+              end
+            end
+            
+            sleep 10
+          end
+        end # End cleanup thread
+        
+        # Bitfinex thread
+        Thread.new do
           # Bitfinex has different formatting for pairs, so this hash enables correct data pulling
           bfx_pair = {
             'BTC_ETH'  => 'ETHBTC',
@@ -55,44 +98,29 @@ module Workspace
           
           # Sets a variable to keep track of the loops
           first_loop = true
-          
+        
           loop do
-            
-            pullPoloniex(timeToPull, pairsToPull)
-            pullBittrex(timeToPull, pairsToPull)
-            
-            # Set time to pull to slightly larger than two intervals
-            timeToPull.each do |intervalArray|
-              intervalArray[1] = intervalArray[0] * 2
-            end
-            
             # Main loop that pulls data from Bitfinex
             # Nested loop so each pair/interval combo gets pulled
             bfx_pair.each do |k, v|
               bfx_time.each do |t|
+                thisRequestStart = Time.now
+                
                 # Only pulls the two most-recent intervals after the first loop (saves time)
-                if( first_loop )
-                  bitfinex_pull( k, v, t[0], t[1], t[2] )
-                else
-                  bitfinex_pull( k, v, t[0], t[1], 2 )
-                end
-              end
-            end
-            
-            # Removes candles when they become so old that they are no longer displayed
-            timeToPull.each do |t|
-              if( Candlestick.exists?( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ) )
-                Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ).destroy_all
+                first_loop ? bitfinex_pull( k, v, t[0], t[1], t[2] ) : bitfinex_pull( k, v, t[0], t[1], 2 )
+                
+                # Give 1 second in between API calls to avoid being blocked.
+                while ((Time.now.to_f * 1000.0) - (thisRequestStart.to_f * 1000.0) < 6000.0) do sleep 0.1 end
               end
             end
             
             # No longer the first loop
-            first_loop = false;
+            first_loop = false
             
-            sleep 120 # Sleep time in seconds
+            sleep 10
           end
-          
-        end
+        end # End Bittrex Thread
+        
       end
     end
     
@@ -104,28 +132,7 @@ module Workspace
       
       # For each tick
       parsed_tick_vals.each do |tick|
-        time = Time.at(tick[0] / 1000).to_datetime  # Converts the epoch timestamp to datetime
-        puts "preparing to add one of many"
-        
-        # Checks if a candle with the same timestamp and interval exists in the database
-        # Also checks of the value of the candle has changed
-        if( Candlestick.exists?( :exchange => 'Bitfinex', :pair => pr1, :interval => int2, :timestamp => time ) )
-          if( Candlestick.exists?( :exchange => 'Bitfinex', :pair => pr1, :interval => int2, :timestamp => time,
-                                  :low => tick[4], :open => tick[1], :close => tick[2], :high => tick[3] ) )
-            puts "candle already exists, and has the same values"
-          else
-            # If the value of the candle has changed, overwrite the entry
-            puts "overwriting outdated entry"
-            Candlestick.where( :exchange => 'Bitfinex', :pair => pr1, :interval => int2, :timestamp => time ).destroy_all
-            candle_tick = Candlestick.new( :exchange => 'Bitfinex', :pair => pr1, :low => tick[4], :open => tick[1], :close => tick[2], :high => tick[3], :timestamp => time, :interval => int2 )
-            candle_tick.save
-          end
-        else
-          # The candle does not exist, so write to database
-          puts "candle does not exist - add to database"
-          candle_tick = Candlestick.new( :exchange => 'Bitfinex', :pair => pr1, :low => tick[4], :open => tick[1], :close => tick[2], :high => tick[3], :timestamp => time, :interval => int2 )
-          candle_tick.save
-        end
+        addCandlestick('Bitfinex', pr1, Time.at(tick[0] / 1000).to_datetime, tick[1], tick[3], tick[4], tick[2], int2)
       end
       puts "finished adding values for this interval"
     end
