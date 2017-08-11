@@ -36,7 +36,7 @@ module Workspace
         
         # Bittrex update thread
         Thread.new do
-          bittrexTimeToPull = timeToPull
+          bittrexTimeToPull = [[300, 60*60*6 + 300], [3600, 60*60*24 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
           loop do
             pullBittrex(bittrexTimeToPull, pairsToPull)
             
@@ -51,7 +51,8 @@ module Workspace
         
         # Poloniex update thread
         Thread.new do
-          poloniexTimeToPull = timeToPull
+          poloniexTimeToPull = [[300, 60*60*6 + 300], [3600, 60*60*24 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
+          
           loop do
             pullPoloniex(poloniexTimeToPull, pairsToPull)
             
@@ -66,14 +67,14 @@ module Workspace
         
         # Cleanup thread - removes candles when they become so old that they are no longer displayed
         Thread.new do
+          timesToClean = [[300, 60*60*6 + 300], [3600, 60*60*24 + 3600], [43200, 60*60*24*7 + 43200], [86400, 60*60*24*30 + 86400]]
+
           loop do
-            timeToPull.each do |t|
-              if( Candlestick.exists?( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ) )
-                Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.now - t[1] ), :interval => t[0] ).destroy_all
-              end
+            timesToClean.each do |t|
+              Candlestick.where( :timestamp => ( Time.at( 000000000 ) )...( Time.at((Time.now).to_i - t[1].to_i) ), :interval => t[0] ).destroy_all
             end
             
-            sleep 10
+            sleep 300
           end
         end # End cleanup thread
         
@@ -132,7 +133,7 @@ module Workspace
       
       # For each tick
       parsed_tick_vals.each do |tick|
-        addCandlestick('Bitfinex', pr1, Time.at(tick[0] / 1000).to_datetime, tick[1], tick[3], tick[4], tick[2], int2)
+        addCandlestick("Bitfinex", pr1, Time.at(tick[0] / 1000).to_datetime, tick[1], tick[3], tick[4], tick[2], int2)
       end
       puts "finished adding values for this interval"
     end
