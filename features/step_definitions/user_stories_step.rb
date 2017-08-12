@@ -28,7 +28,7 @@ When(/^I select a currency$/) do
     links[linkNumb].click
 end
 Then(/^I should see the currency price history$/) do
-    page.should have_selector("div", :id=>'pair1')
+    page.should have_selector("div", :id => 'pair1')
     page.should have_selector("div", :id => 'pair2')
 end
 
@@ -48,5 +48,16 @@ When(/^I click on new to market button$/) do
 end
 Then(/^Browser creates new tab that directs me to an introduction$/) do
     href = "http://cryptosource.org/getting-started/"
+    page.should have_selector "a[href='#{href}']"
+end
+
+Given(/^I am on the wallets page$/) do
+    visit "/wallets"
+end
+When(/^I click the coinbase button$/) do
+    page.should have_selector("a", :id => "coinbaselink")
+end
+Then(/^My browser should open a new tab and go to the coinbase webpage$/) do
+    href = "https://www.coinbase.com/mobile?locale=en-US"
     page.should have_selector "a[href='#{href}']"
 end
