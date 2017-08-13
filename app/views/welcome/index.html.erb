@@ -6,8 +6,24 @@
     background-color: #4877EE;
     margin: 0;
     }
-    
     </style>
+    <script>
+    $(document).ready(function () {
+      display1();
+    });
+
+    function display1() {
+      $('#cycle').fadeIn(300).html('<img src="/images/homebox1.png"/>').delay(5000).fadeOut(300, function () { display2(); });
+    }
+
+    function display2() {
+      $('#cycle').fadeIn(300).html('<img src="/images/homebox2.png"/>').delay(5000).fadeOut(300, function () { display3(); });
+    }
+    
+    function display3() {
+      $('#cycle').fadeIn(300).html('<img src="/images/homebox3.png"/>').delay(5000).fadeOut(300, function () { display1(); });
+    }
+    </script>
     <meta charset="UTF-8">
     <head>
         <title>Cryptogator</title>
@@ -22,7 +38,18 @@
             <a href = "http://cryptosource.org/getting-started/" target = "_blank" id="intro"><div><img src='/images/home buttons/new_unselected.png' onmouseover="this.src='/images/home buttons/new_selected.png';" onmouseout="this.src='images/home buttons/new_unselected.png';"/></div></a>
         </div>
             <br><br>
-            <img src='/images/placeholder.png'></img>
+            <div style="margin: 0 auto; width: 1000px;">
+                <div style="float: left;"><a class="twitter-timeline" data-width="300" data-height="400" data-theme="light" href="https://twitter.com/CryptoCoinsNews">Tweets by CryptoCoinsNews</a> <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div>
+                <div style="margin: 0 auto; width: 650px; float: right;">
+                    <a href = "exchanges"><div><img src='/images/home buttons/use_unselected.png' onmouseover="this.src='/images/home buttons/use_selected.png';" onmouseout="this.src='images/home buttons/use_unselected.png';"/></div></a>
+                </div>
+                <div id="cycle" style="margin: 0 auto; width: 650px; float: right;">
+                    <br><br>
+                    <img src='/images/homebox1.png'/>
+                    <img src='/images/homebox2.png'/>
+                    <img src='/images/homebox3.png'/>
+                </div>
+            </div>
         </div>
     </body>
 </html>
