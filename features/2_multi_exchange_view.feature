@@ -3,6 +3,6 @@ Feature:    As an investor
             I would like to see the prices at each exchange in one convenient location
 
 Scenario: Multi-Exchange View
-    Given I am on the exchanges page
-    When I click an exchange name
-    Then I should see exchange button
+    Given I am comparing currencies
+    When I select a currency
+    Then I should see an all exchanges button

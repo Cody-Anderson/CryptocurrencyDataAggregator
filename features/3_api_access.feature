@@ -3,7 +3,6 @@ Feature:    As a developer
             I would like to have access to exchange APIs
 
 Scenario: API Access
-    Given PENDING: Given that I am on the About page
-    When I click on an API box
-    Then my web browser should open a new tab 
-    And navigate to that API’s webpage
+    Given I am on the about page
+    When I click on the button marked Bittrex
+    Then my web browser should navigate to that APIs webpage

@@ -3,6 +3,6 @@ Feature:    As a developer
             I would like a summary of how each Exchange’s API works
 
 Scenario: API Summmary
-    Given PENDING: That I am on the API page
+    Given I am on the about page
     When I scroll down to the name of the exchange
-    Then I should see helpful tips about the exchange’s API, such as rate limits
+    Then I should see helpful tips about the exchange API, such as rate limits
