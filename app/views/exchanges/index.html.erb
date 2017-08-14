@@ -1,5 +1,53 @@
 <!DOCTYPE html>
 <html>
+    <script language="javascript">
+        var bittrix = document.getElementById("bittrex");
+        bittrex.addEventListener("mouseover", bittrexMouseover, false);
+        bittrex.addEventListener("mouseout", bittrexMouseout, false);    
+        
+        function bittrexMouseover() {
+          document.getElementById("bittrex_fees").setAttribute("style", "display:block;")
+        }
+      
+        function bittrexMouseout() {
+          document.getElementById("bittrex_fees").setAttribute("style", "display:none;")
+        }
+        
+        var poloniex = document.getElementById("poloniex");
+        poloniex.addEventListener("mouseover", poloniexMouseover, false);
+        poloniex.addEventListener("mouseout", poloniexMouseout, false);
+        
+        function poloniexMouseover() {
+          document.getElementById("poloniex_fees").setAttribute("style", "display:block;")
+        }
+      
+        function poloniexMouseout() {
+          document.getElementById("poloniex_fees").setAttribute("style", "display:none;")
+        }
+    
+        var bitfinex = document.getElementById("bitfinex");
+        bitfinex.addEventListener("mouseover", bitfinexMouseover, false);
+        bitfinex.addEventListener("mouseout", bitfinexMouseout, false);
+        
+        function bitfinexMouseover() {
+          document.getElementById("bitfinex_fees").setAttribute("style", "display:block;")
+        }
+      
+        function bitfinexMouseout() {
+          document.getElementById("bitfinex_fees").setAttribute("style", "display:none;")
+        }
+    </script>
+    <style>
+        div#bittrex_fees {
+            display: none;
+        }
+        div#poloniex_fees {
+            display: none;
+        }
+        div#bitfinex_fees {
+            display: none;
+        }
+    </style>
     <meta charset="UTF-8">
     <head>
         <title>Exchanges</title>
@@ -15,10 +63,14 @@
         <div style="margin: 0 auto; width: 400px;">
             <div style="margin: 10 auto; width: 400px;"><f>Supported Exchanges:</f></div>
             <br>
-                <a href = "exchanges/show/?all=false&x=Bittrex" id="exchanges" target = "_blank"><div style="display: inline-block;"><img src='/images/exchange buttons/bittrex_unselected.png' onmouseover="this.src='/images/exchange buttons/bittrex_selected.png';" onmouseout="this.src='images/exchange buttons/bittrex_unselected.png';"/></div></a>
-                <a href = "exchanges/show/?all=false&x=Poloniex" id="exchanges" target = "_blank"><div style="display: inline-block;"><img src='/images/exchange buttons/poloniex_unselected.png' onmouseover="this.src='/images/exchange buttons/poloniex_selected.png';" onmouseout="this.src='images/exchange buttons/poloniex_unselected.png';"/></div></a>
-                <a href = "exchanges/show/?all=false&x=Bitfinex" id="exchanges" target = "_blank"><div style="display: inline-block;"><img src='/images/exchange buttons/bitfinex_unselected.png' onmouseover="this.src='/images/exchange buttons/bitfinex_selected.png';" onmouseout="this.src='images/exchange buttons/bitfinex_unselected.png';"/></div></a>
+                <a href = "exchanges/show/?all=false&x=Bittrex" id="exchanges" target = "_blank"><div id='bittrex' style="display: inline-block;"><img src='/images/exchange buttons/bittrex_unselected.png' onmouseover="this.src='/images/exchange buttons/bittrex_selected.png';" onmouseout="this.src='images/exchange buttons/bittrex_unselected.png';"/></div></a>
+                <a href = "exchanges/show/?all=false&x=Poloniex" id="exchanges" target = "_blank"><div id='poloniex' style="display: inline-block;"><img src='/images/exchange buttons/poloniex_unselected.png' onmouseover="this.src='/images/exchange buttons/poloniex_selected.png';" onmouseout="this.src='images/exchange buttons/poloniex_unselected.png';"/></div></a>
+                <a href = "exchanges/show/?all=false&x=Bitfinex" id="exchanges" target = "_blank"><div id='bitfinex' style="display: inline-block;"><img src='/images/exchange buttons/bitfinex_unselected.png' onmouseover="this.src='/images/exchange buttons/bitfinex_selected.png';" onmouseout="this.src='images/exchange buttons/bitfinex_unselected.png';"/></div></a>
         </div>
-        
+        <div style="margin: 0 auto; width: 610px;">
+            <div id='bittrex_fees'><img src='/images/exchange buttons/bittrex_fees.png' /></div>
+            <div id='poloniex_fees'><img src='/images/exchange buttons/poloniex_fees.png' /></div>
+            <div id='bitfinex_fees'><img src='/images/exchange buttons/bitfinex_fees.png' /></div>
+        </div>
     </body>
 </html>
