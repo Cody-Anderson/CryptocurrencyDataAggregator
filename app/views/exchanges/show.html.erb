@@ -3,25 +3,31 @@
 
 <div id="buttons">
 <!-- These are the buttons that manipulate the graph sets and properties -->
-<!-- I plan to have the exchange buttons on the right, and the timeframe buttons on the bottom -->
-<%= link_to "BTC/ETH", exchange_path( :x => @exchange, :p => "BTC_ETH" ), { :class=>"exchange_button" } %><br><br><br>
-<%= link_to "BTC/XMR", exchange_path( :x => @exchange, :p => "BTC_XMR" ), { :class=>"exchange_button" } %><br><br><br>
-<%= link_to "BTC/DASH", exchange_path( :x => @exchange, :p => "BTC_DASH" ), { :class=>"exchange_button" } %><br><br><br>
-<%= link_to "BTC/LTC", exchange_path( :x => @exchange, :p => "BTC_LTC" ), { :class=>"exchange_button" } %><br><br><br>
-<%= link_to "BTC/XRP", exchange_path( :x => @exchange, :p => "BTC_XRP" ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "BTC/ETH", exchange_path( :all => "false", :x => @exchange, :p => "BTC_ETH", :tf => @frame ), { :class=>"exchange_button" } %>
+<%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_ETH", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "BTC/XMR", exchange_path( :all => "false", :x => @exchange, :p => "BTC_XMR", :tf => @frame ), { :class=>"exchange_button" } %>
+<%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_XMR", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "BTC/DASH", exchange_path( :all => "false", :x => @exchange, :p => "BTC_DASH", :tf => @frame ), { :class=>"exchange_button" } %>
+<%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_DASH", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "BTC/LTC", exchange_path( :all => "false", :x => @exchange, :p => "BTC_LTC", :tf => @frame ), { :class=>"exchange_button" } %>
+<%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_LTC", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br>
+<%= link_to "BTC/XRP", exchange_path( :all => "false", :x => @exchange, :p => "BTC_XRP", :tf => @frame ), { :class=>"exchange_button" } %>
+<%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_XRP", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br>
 
 <!-- Bitfinex doesn't have the BTC/ZEC and BTC/SC pairs -->
 <% if( @exchange != "Bitfinex" ) %>
-    <%= link_to "BTC/ZEC", exchange_path( :x => @exchange, :p => "BTC_ZEC" ), { :class=>"exchange_button" } %><br><br><br>
-    <%= link_to "BTC/SC", exchange_path( :x => @exchange, :p => "BTC_SC" ), { :class=>"exchange_button" } %><br><br><br><br><br><br>
+    <%= link_to "BTC/ZEC", exchange_path( :all => "false", :x => @exchange, :p => "BTC_ZEC" ), { :class=>"exchange_button" } %>
+    <%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_ZEC", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br>
+    <%= link_to "BTC/SC", exchange_path( :all => "false", :x => @exchange, :p => "BTC_SC" ), { :class=>"exchange_button" } %>
+    <%= link_to "All Exchanges", exchange_path( :all => "true", :x => @exchange, :p => "BTC_SC", :tf => @frame ), { :class=>"exchange_button" } %><br><br><br><br><br><br>
 <% else %>
     <br><br><br>
 <% end %>
 
-<%= link_to "6h", exchange_path( :x => @exchange, :p => @pair, :tf => 6.hours ), { :class=>"exchange_button" } %>
-<%= link_to "1D", exchange_path( :x => @exchange, :p => @pair, :tf => 1.day ), { :class=>"exchange_button" } %>
-<%= link_to "1W", exchange_path( :x => @exchange, :p => @pair, :tf => 1.week ), { :class=>"exchange_button" } %>
-<%= link_to "1M", exchange_path( :x => @exchange, :p => @pair, :tf => 1.month ), { :class=>"exchange_button" } %>
+<%= link_to "6h", exchange_path( :all => @all.to_s, :x => @exchange, :p => @pair, :tf => 6.hours ), { :class=>"exchange_button" } %>
+<%= link_to "1D", exchange_path( :all => @all.to_s, :x => @exchange, :p => @pair, :tf => 1.day ), { :class=>"exchange_button" } %>
+<%= link_to "1W", exchange_path( :all => @all.to_s, :x => @exchange, :p => @pair, :tf => 1.week ), { :class=>"exchange_button" } %>
+<%= link_to "1M", exchange_path( :all => @all.to_s, :x => @exchange, :p => @pair, :tf => 1.month ), { :class=>"exchange_button" } %>
 </div>
 
 <!-- These are tags that hold data from the controller -->
@@ -30,3 +36,6 @@
 <div id="exchange" data-temp=<%= raw @exchange.to_json %> />
 <div id="pair1" data-temp=<%= raw @pair1.to_json %> />
 <div id="pair2" data-temp=<%= raw @pair2.to_json %> />
+<div id="all" data-temp=<%= raw @all.to_json %> />
+<div id="min" data-temp="<%= raw @min.to_json %>" />
+<div id="max" data-temp="<%= raw @max.to_json %>" />
